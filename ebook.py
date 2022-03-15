@@ -5,7 +5,7 @@ import time
 
 class Entries(QtWidgets.QLabel):
    """
-      Класс для записей
+      Класс для записей 
    """
    clicked = QtCore.pyqtSignal()
    def __init__(self, parent=None):
