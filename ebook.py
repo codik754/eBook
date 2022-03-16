@@ -23,6 +23,9 @@ class Entries(QtWidgets.QLabel):
 
    #Мышка нажата. Левая кнопка
    def mousePressEvent(self, QMouseEvent):
+      #Правый клик
+      if QMouseEvent.button() == QtCore.Qt.RightButton:
+         print("Правый клик")
       #Первый клик
       if QMouseEvent.button() == QtCore.Qt.LeftButton and self.bitSel == False:
             print("Один клик")
@@ -35,9 +38,6 @@ class Entries(QtWidgets.QLabel):
             self.returnBackground()
             self.bitSel = False #сбрасываем бит. Элемент опять становиться не выбраным
             self.clicked.emit()
-      #
-      if QMouseEvent.button() == QtCore.Qt.LeftButton and self.bitSel == False:pass
-
 
    #Изменение фона
    def changeBackground(self):pass
@@ -48,13 +48,22 @@ class Entries(QtWidgets.QLabel):
       #self.setStyleSheet("font-size:13pt;border-top:1px solid #000000;background:white;")
 
 
+class PlusWindow(QtWidgets.QWidget):
+   """
+      Окно для добавления записи
+   """
+   def __init__(self, parent=None):
+      QtWidgets.QWidget.__init__(self, parent)
+      uic.loadUi("ui/plus.ui", self)
+
+
 class MainWindow(QtWidgets.QMainWindow):
    """
       Главное окно приложения
    """
    def __init__(self, parent=None):
       QtWidgets.QMainWindow.__init__(self, parent)
-      uic.loadUi("main.ui", self)
+      uic.loadUi("ui/main.ui", self)
       self.setFixedSize(290, 500)
       self.bd = sqlite3.connect('mybd.bd') #подключаемся к БД
       self.cur = self.bd.cursor()
@@ -74,7 +83,7 @@ class MainWindow(QtWidgets.QMainWindow):
    def showEntries(self):
       self.vbox = QtWidgets.QVBoxLayout() #Layout для кнопок
       self.vbox.setContentsMargins(0, 0, 0, 0)
-      for row in self.cur.execute("SELECT * FROM entries WHERE isdelete = 0;"):
+      for row in self.cur.execute("SELECT * FROM entries WHERE isdelete = 0 ORDER BY id DESC;"):
          ent = Entries()
          ent.id = row[0]
          ent.title = row[1]
@@ -94,8 +103,10 @@ class MainWindow(QtWidgets.QMainWindow):
       
 
    #При нажатие на кнопку добавить
-   def add(self): pass
-      #print("Добавить запись")
+   def add(self):
+      self.plus = PlusWindow()
+      self.plus.show()
+      print("Добавить запись")
 
    #При нажатие на кнопку удалить
    def delete(self):
