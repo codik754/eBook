@@ -52,10 +52,45 @@ class PlusWindow(QtWidgets.QWidget):
    """
       Окно для добавления записи
    """
+   send_data = QtCore.pyqtSignal(str, str)
    def __init__(self, parent=None):
       QtWidgets.QWidget.__init__(self, parent)
       uic.loadUi("ui/plus.ui", self)
+      #Указываем тип окна
+      self.setWindowFlags(QtCore.Qt.Dialog)
+      #Фиксированный размер окна
+      self.setFixedSize(500, 400)
+      #Делаем окно модальным
+      self.setWindowModality(QtCore.Qt.ApplicationModal)
+      #Настройка кнопок
+      self.bAdd.clicked.connect(self.add)
+      self.bReset.clicked.connect(self.reset)
+      #Окно предупреждения
+      self.message = QtWidgets.QMessageBox(self)
+   
+   #Сброс значений в полях
+   def reset(self):
+      self.tName.clear()
+      self.tText.clear()
+      
+   def add(self):
+      if self.tName.text() == "" and self.tText.toPlainText() == "":
+         self.message.information(window, "Сообщение", "Поля пусты. Введите значения", buttons=QtWidgets.QMessageBox.Close)
+      elif self.tName.text() == "":
+         self.message.information(window, "Сообщение", "Поля название пустое. Введите значение", buttons=QtWidgets.QMessageBox.Close)
+      elif self.tText.toPlainText() == "":
+         self.message.information(window, "Сообщение", "Поля текст пустое. Введите значение", buttons=QtWidgets.QMessageBox.Close)
+      else:
+         self.send_data.emit(self.tName.text(), self.tText.toPlainText())
+         self.close()
 
+class ShowWindow(QtWidgets.QWidget):
+   """
+      Окно для отображения записи
+   """
+   def __init__(self, parent=None):
+      QtWidgets.QWidget.__init__(self, parent)
+      uic.loadUi("ui/show.ui", self)
 
 class MainWindow(QtWidgets.QMainWindow):
    """
@@ -65,21 +100,29 @@ class MainWindow(QtWidgets.QMainWindow):
       QtWidgets.QMainWindow.__init__(self, parent)
       uic.loadUi("ui/main.ui", self)
       self.setFixedSize(290, 500)
+
+      self.plusWindow = PlusWindow() #окно добавления записи
+      self.plusWindow.send_data[str, str].connect(self.addToBD)
+
       self.bd = sqlite3.connect('mybd.bd') #подключаемся к БД
       self.cur = self.bd.cursor()
 
       self.now = mydate.myDate() #атрибут для даты
-      self.now.setNow() #устанавливаем текущую дату и время
      
       #Настройки для кнопок
       self.plus.setToolTip("Добавить запись")
       self.plus.setToolTipDuration(3000)
       self.minus.setToolTip("Удалить запись")
       self.minus.setToolTipDuration(3000)
-
+      self.plus.clicked.connect(self.add)
+      self.minus.clicked.connect(self.delete)
+      
       self.showEntries()
-     
-   #Показать записи
+   
+   def expir(self, one, two):
+      print("One: ", one, "   Two: ", two)
+
+   #Показать записи в меню
    def showEntries(self):
       self.vbox = QtWidgets.QVBoxLayout() #Layout для кнопок
       self.vbox.setContentsMargins(0, 0, 0, 0)
@@ -98,15 +141,21 @@ class MainWindow(QtWidgets.QMainWindow):
       self.scrollArea.setVerticalScrollBarPolicy(1)
       #self.scrollArea.setStyleSheet("border-radius:10px 10px 10px 10px;")
 
-      self.plus.clicked.connect(self.add)
-      self.minus.clicked.connect(self.delete)
-      
+   #Отображение записи
+   def showEntry(self):
+      self.entry = ShowWindow()
 
    #При нажатие на кнопку добавить
    def add(self):
-      self.plus = PlusWindow()
-      self.plus.show()
-      print("Добавить запись")
+      self.plusWindow.show()
+   
+   #Добавление в БД
+   def addToBD(self, name, text):
+     self.now.setNow() #устанавливаем текущую дату и время
+     query = "INSERT INTO entries (name, text, date, isdelete) VALUES ('" + name + "', '" + text + "', '" + self.now.getDatetime() + "', 0);"
+     self.cur.execute(query)
+     self.bd.commit()
+     self.showEntries()
 
    #При нажатие на кнопку удалить
    def delete(self):

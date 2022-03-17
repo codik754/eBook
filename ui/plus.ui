@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>407</width>
-    <height>375</height>
+    <width>500</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QPushButton" name="bAdd">
    <property name="geometry">
     <rect>
-     <x>110</x>
-     <y>320</y>
+     <x>120</x>
+     <y>340</y>
      <width>89</width>
      <height>25</height>
     </rect>
@@ -29,8 +29,8 @@
   <widget class="QPushButton" name="bReset">
    <property name="geometry">
     <rect>
-     <x>220</x>
-     <y>320</y>
+     <x>270</x>
+     <y>340</y>
      <width>89</width>
      <height>25</height>
     </rect>
@@ -42,7 +42,7 @@
   <widget class="QLabel" name="lName">
    <property name="geometry">
     <rect>
-     <x>130</x>
+     <x>180</x>
      <y>30</y>
      <width>111</width>
      <height>21</height>
@@ -61,9 +61,9 @@
   <widget class="QLineEdit" name="tName">
    <property name="geometry">
     <rect>
-     <x>102</x>
+     <x>90</x>
      <y>60</y>
-     <width>191</width>
+     <width>301</width>
      <height>25</height>
     </rect>
    </property>
@@ -71,7 +71,7 @@
   <widget class="QLabel" name="lText">
    <property name="geometry">
     <rect>
-     <x>130</x>
+     <x>180</x>
      <y>100</y>
      <width>111</width>
      <height>21</height>
@@ -87,13 +87,13 @@
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QTextEdit" name="textEdit">
+  <widget class="QTextEdit" name="tText">
    <property name="geometry">
     <rect>
-     <x>43</x>
+     <x>30</x>
      <y>140</y>
-     <width>321</width>
-     <height>151</height>
+     <width>441</width>
+     <height>181</height>
     </rect>
    </property>
   </widget>
