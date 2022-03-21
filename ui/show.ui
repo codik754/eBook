@@ -32,7 +32,7 @@
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QTextBrowser" name="tText">
+  <widget class="QTextEdit" name="tText">
    <property name="geometry">
     <rect>
      <x>30</x>

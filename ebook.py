@@ -1,15 +1,16 @@
 from PyQt5 import QtWidgets, QtCore, uic
 import mydate
 import sqlite3
-import time
 
 class Entries(QtWidgets.QLabel):
    """
       Класс для записей 
    """
    clicked = QtCore.pyqtSignal()
+   openentry = QtCore.pyqtSignal(int)
    def __init__(self, parent=None):
       QtWidgets.QPushButton.__init__(self, parent)
+      self.n = 0 # порядковый номер в элементе
       self.id = 0 #id записи
       self.title = ""
       self.datetime = mydate.myDate()
@@ -26,6 +27,7 @@ class Entries(QtWidgets.QLabel):
       #Правый клик
       if QMouseEvent.button() == QtCore.Qt.RightButton:
          print("Правый клик")
+         self.openentry.emit(self.n)
       #Первый клик
       if QMouseEvent.button() == QtCore.Qt.LeftButton and self.bitSel == False:
             print("Один клик")
@@ -88,9 +90,15 @@ class ShowWindow(QtWidgets.QWidget):
    """
       Окно для отображения записи
    """
-   def __init__(self, parent=None):
+   def __init__(self, parent=None, name="Без названия", text=""):
       QtWidgets.QWidget.__init__(self, parent)
       uic.loadUi("ui/show.ui", self)
+      self.setWindowFlags(QtCore.Qt.Dialog)
+      self.setFixedSize(500, 400)
+      self.setWindowModality(QtCore.Qt.ApplicationModal)
+      self.lName.setText(name)
+      self.tText.setText(text)
+
 
 class MainWindow(QtWidgets.QMainWindow):
    """
@@ -119,19 +127,20 @@ class MainWindow(QtWidgets.QMainWindow):
       
       self.showEntries()
    
-   def expir(self, one, two):
-      print("One: ", one, "   Two: ", two)
-
    #Показать записи в меню
    def showEntries(self):
       self.vbox = QtWidgets.QVBoxLayout() #Layout для кнопок
       self.vbox.setContentsMargins(0, 0, 0, 0)
+      i = 0 # счетчик
       for row in self.cur.execute("SELECT * FROM entries WHERE isdelete = 0 ORDER BY id DESC;"):
          ent = Entries()
+         ent.n = i
+         i += 1
          ent.id = row[0]
          ent.title = row[1]
          ent.datetime.setFromString(row[3])
          ent.setText(ent.returnHtml())
+         ent.openentry[int].connect(self.showEntry)
          self.vbox.addWidget(ent)
          
       self.vbox.setSpacing(0) #Отступы между элементами
@@ -142,8 +151,13 @@ class MainWindow(QtWidgets.QMainWindow):
       #self.scrollArea.setStyleSheet("border-radius:10px 10px 10px 10px;")
 
    #Отображение записи
-   def showEntry(self):
-      self.entry = ShowWindow()
+   def showEntry(self, n):
+      print("Показываю запись:", n)
+      ent = self.vbox.itemAt(n).widget()
+      query = "SELECT * FROM entries WHERE id = " + str(ent.id) + ";"
+      t = self.cur.execute(query).fetchone()
+      self.entry = ShowWindow(name=ent.title, text=t[2])
+      self.entry.show()
 
    #При нажатие на кнопку добавить
    def add(self):
